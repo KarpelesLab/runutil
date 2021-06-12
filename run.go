@@ -77,11 +77,7 @@ func RunRead(arg ...string) (io.ReadCloser, error) {
 		return nil, err
 	}
 
-	re := newErrorPipe(r)
-
-	go func() {
-		re.setError(c.Wait())
-	}()
+	re := newErrorPipe(r, c.Wait)
 
 	return re, nil
 }
@@ -114,11 +110,7 @@ func RunPipe(r io.Reader, arg ...string) (io.ReadCloser, error) {
 		return nil, err
 	}
 
-	re := newErrorPipe(out)
-
-	go func() {
-		re.setError(c.Wait())
-	}()
+	re := newErrorPipe(out, c.Wait)
 
 	return re, nil
 }
