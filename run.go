@@ -140,6 +140,7 @@ func RunJson(obj interface{}, arg ...string) error {
 	if err != nil {
 		return err
 	}
+	defer r.Close() // close pipe after we finish reading, since json decoder won't read until EOF
 
 	// parse
 	dec := json.NewDecoder(r)
