@@ -2,7 +2,10 @@ package runutil
 
 import (
 	"bytes"
+	"compress/gzip"
+	"encoding/base64"
 	"errors"
+	"io"
 	"io/ioutil"
 	"os/exec"
 	"testing"
@@ -110,5 +113,41 @@ func TestPipeErrorCascade(t *testing.T) {
 	}
 	if e.ProcessState.ExitCode() != 42 {
 		t.Errorf("failed, the command was supposed to return error 42")
+	}
+}
+
+func TestComplex(t *testing.T) {
+	buf := []byte("this string is going to be going through so many things, I'm afraid for it... haha!")
+
+	var res io.Reader
+
+	res, err := RunPipe(bytes.NewReader(buf), "gzip", "-9")
+	if err != nil {
+		t.Errorf("failed to run test: %s", err)
+		return
+	}
+
+	res, err = gzip.NewReader(res)
+	if err != nil {
+		t.Errorf("failed to run test: %s", err)
+		return
+	}
+
+	res, err = RunPipe(res, "base64")
+	if err != nil {
+		t.Errorf("failed to run test: %s", err)
+		return
+	}
+
+	res = base64.NewDecoder(base64.StdEncoding, res)
+
+	final, err := ioutil.ReadAll(res)
+	if err != nil {
+		t.Errorf("failed to run test: %s", err)
+		return
+	}
+
+	if !bytes.Equal(final, buf) {
+		t.Errorf("failed to run test: should have been equal, instead got %s", final)
 	}
 }
