@@ -2,7 +2,9 @@ package runutil
 
 import (
 	"bytes"
+	"errors"
 	"io/ioutil"
+	"os/exec"
 	"testing"
 )
 
@@ -52,7 +54,7 @@ func TestPipe(t *testing.T) {
 }
 
 func TestPipeError(t *testing.T) {
-	res, err := RunRead("/bin/sh", "-c", "echo -n this will echo something but then things will go wrong; exit 1")
+	res, err := RunRead("/bin/sh", "-c", "echo -n this will echo something but then things will go wrong; exit 42")
 	if err != nil {
 		t.Errorf("failed to run test: %s", err)
 		return
@@ -64,7 +66,49 @@ func TestPipeError(t *testing.T) {
 		t.Errorf("failed, buf did not contain the expected stuff")
 	}
 	if err == nil {
+		t.Errorf("failed, the command was supposed to return an error but didn't")
+		return
+	}
+
+	var e *exec.ExitError
+	if !errors.As(err, &e) {
+		t.Errorf("failed, the command was supposed to return an error of type exec.ExitError, got %T (%s)", err, err)
+		return
+	}
+	if e.ProcessState.ExitCode() != 42 {
+		t.Errorf("failed, the command was supposed to return error 42")
+	}
+}
+
+func TestPipeErrorCascade(t *testing.T) {
+	res, err := RunRead("/bin/sh", "-c", "echo -n this will echo something but then things will go wrong; exit 42")
+	if err != nil {
+		t.Errorf("failed to run test: %s", err)
+		return
+	}
+
+	res2, err := RunPipe(res, "cat")
+	if err != nil {
+		t.Errorf("failed to run test: %s", err)
+		return
+	}
+
+	buf, err := ioutil.ReadAll(res2)
+
+	if string(buf) != "this will echo something but then things will go wrong" {
+		t.Errorf("failed, buf did not contain the expected stuff")
+	}
+	if err == nil {
 		// TODO check if exit status 1 ?
 		t.Errorf("failed, the command was supposed to return an error but didn't")
+	}
+
+	var e *exec.ExitError
+	if !errors.As(err, &e) {
+		t.Errorf("failed, the command was supposed to return an error of type exec.ExitError, got %T (%s)", err, err)
+		return
+	}
+	if e.ProcessState.ExitCode() != 42 {
+		t.Errorf("failed, the command was supposed to return error 42")
 	}
 }
