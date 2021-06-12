@@ -35,5 +35,15 @@ func (r *errorPipe) Read(p []byte) (int, error) {
 }
 
 func (r *errorPipe) Close() error {
-	return r.r.Close()
+	err := r.r.Close()
+
+	// call Wait() after doing the Close() (will likely return quickly)
+	r.o.Do(func() {
+		r.e = r.c()
+	})
+	if r.e != nil {
+		return r.e
+	}
+
+	return err
 }

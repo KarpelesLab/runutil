@@ -7,6 +7,7 @@ import (
 	"errors"
 	"io"
 	"io/ioutil"
+	"net/http"
 	"os/exec"
 	"testing"
 )
@@ -149,5 +150,41 @@ func TestComplex(t *testing.T) {
 
 	if !bytes.Equal(final, buf) {
 		t.Errorf("failed to run test: should have been equal, instead got %s", final)
+	}
+}
+
+func TestRemote(t *testing.T) {
+	// https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.12.10.tar.xz
+	resp, err := http.Get("https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.12.10.tar.xz")
+	if err != nil {
+		t.Errorf("failed to run test: %s", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	// pipe this to xz
+	res, err := RunPipe(resp.Body, "xz", "--decompress")
+	if err != nil {
+		t.Errorf("failed to run test: %s", err)
+		return
+	}
+
+	// read some bytes
+	buf := make([]byte, 17)
+	_, err = res.Read(buf)
+	if err != nil {
+		t.Errorf("failed to run test: %s", err)
+		return
+	}
+
+	// force close of res so we stop download
+	err = res.Close()
+	// err = signal: broken pipe
+	if err.Error() != "signal: broken pipe" {
+		t.Errorf("error: was expecting broken pipe error, got %s", err)
+	}
+
+	if string(buf) != "pax_global_header" {
+		t.Errorf("failed to run test: invalid output (unexpected result)")
 	}
 }
