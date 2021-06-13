@@ -51,7 +51,7 @@ func RunWrite(r io.Reader, arg ...string) error {
 }
 
 // RunRead executes and returns the command's output as a stream
-func RunRead(arg ...string) (io.ReadCloser, error) {
+func RunRead(arg ...string) (Pipe, error) {
 	if len(arg) == 0 {
 		return nil, ErrCommandMissing
 	}
@@ -77,13 +77,13 @@ func RunRead(arg ...string) (io.ReadCloser, error) {
 		return nil, err
 	}
 
-	re := newErrorPipe(r, c.Wait)
+	re := newProcessPipe(r, c)
 
 	return re, nil
 }
 
 // RunPipe runs a command, connecting both ends
-func RunPipe(r io.Reader, arg ...string) (io.ReadCloser, error) {
+func RunPipe(r io.Reader, arg ...string) (Pipe, error) {
 	if len(arg) == 0 {
 		return nil, ErrCommandMissing
 	}
@@ -110,7 +110,7 @@ func RunPipe(r io.Reader, arg ...string) (io.ReadCloser, error) {
 		return nil, err
 	}
 
-	re := newErrorPipe(out, c.Wait)
+	re := newProcessPipe(out, c)
 
 	return re, nil
 }

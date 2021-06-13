@@ -3,6 +3,7 @@ package runutil
 import (
 	"bytes"
 	"compress/gzip"
+	"context"
 	"encoding/base64"
 	"errors"
 	"io"
@@ -178,7 +179,11 @@ func TestRemote(t *testing.T) {
 	}
 
 	// force close of res so we stop download
-	err = res.Close()
+	err = res.CloseWait(context.Background())
+	if err == nil {
+		t.Errorf("error: was expecting an error, got no error")
+		return
+	}
 	// err = signal: broken pipe
 	if err.Error() != "signal: broken pipe" {
 		t.Errorf("error: was expecting broken pipe error, got %s", err)
