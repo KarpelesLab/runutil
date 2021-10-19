@@ -1,3 +1,4 @@
+//go:build !windows
 package runutil
 
 import (
