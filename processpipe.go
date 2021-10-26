@@ -10,6 +10,7 @@ import (
 
 type Pipe interface {
 	io.ReadCloser
+	CopyTo(io.Writer) (int64, error)
 	CloseWait(ctx context.Context) error
 }
 
@@ -50,6 +51,23 @@ func (r *processPipe) Close() error {
 	go r.CloseWait(ctx)
 
 	return err
+}
+
+func (r *processPipe) CopyTo(w io.Writer) (int64, error) {
+	// read whole pipe & write to writer
+	n, err := io.Copy(w, r.r)
+	if err != nil {
+		return n, err
+	}
+
+	// we reached eof
+	r.o.Do(func() {
+		r.e = r.p.Wait()
+	})
+	if r.e != nil {
+		return n, r.e
+	}
+	return n, nil
 }
 
 func (r *processPipe) CloseWait(ctx context.Context) error {
