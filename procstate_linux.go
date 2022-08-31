@@ -77,7 +77,7 @@ func (s *LinuxProcState) Started() (time.Time, error) {
 
 	// compute response
 	now := time.Now()
-	res := now.Add(time.Duration(procUptime * -1 * float64(time.Millisecond)))
+	res := now.Add(time.Duration(procUptime * -1 * float64(time.Second)))
 
 	return res, nil
 }

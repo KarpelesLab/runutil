@@ -2,7 +2,9 @@ package runutil
 
 import (
 	"log"
+	"os"
 	"testing"
+	"time"
 )
 
 func TestLinuxParse(t *testing.T) {
@@ -17,4 +19,25 @@ func TestLinuxParse(t *testing.T) {
 	}
 
 	log.Printf("test = %+v", s)
+
+	testVal := 30 * time.Millisecond
+
+	time.Sleep(testVal)
+
+	// read own value
+	s2, err := PidState(uint64(os.Getpid()))
+	if err != nil {
+		t.Fatalf("test failed: %s", err)
+	}
+
+	tv, err := s2.Started()
+	if err != nil {
+		t.Fatalf("test failed: %s", err)
+	}
+
+	ago := time.Since(tv).Truncate(10 * time.Millisecond)
+
+	if ago != testVal {
+		t.Fatalf("expected %s uptime of process, but got %s", testVal, ago)
+	}
 }
