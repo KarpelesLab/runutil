@@ -57,6 +57,10 @@ func (r *processPipe) Close() error {
 }
 
 func (r *processPipe) CopyTo(w io.Writer) (int64, error) {
+	if r.e != nil {
+		return 0, r.e
+	}
+
 	// read whole pipe & write to writer
 	n, err := io.Copy(w, r.r)
 	if err != nil {
