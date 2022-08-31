@@ -47,8 +47,11 @@ func (r *processPipe) Close() error {
 	err := r.r.Close()
 
 	// call CloseWait() in background
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	go r.CloseWait(ctx)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	go func() {
+		defer cancel()
+		r.CloseWait(ctx)
+	}()
 
 	return err
 }
