@@ -10,7 +10,7 @@ func TestLinuxParse(t *testing.T) {
 
 	s := &LinuxProcState{}
 
-	err := s.Parse(v)
+	err := s.parse(v)
 
 	if err != nil {
 		t.Fatalf("test failed: %s", err)

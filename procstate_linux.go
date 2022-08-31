@@ -119,7 +119,7 @@ func eatValue(in *[]string, out any) error {
 	}
 }
 
-func (s *LinuxProcState) Parse(data string) error {
+func (s *LinuxProcState) parse(data string) error {
 	// see: https://man7.org/linux/man-pages/man5/procfs.5.html
 	// 3947 (bash test) S 3799 3947 3799 34828 3964 4194304 547 1212 0 2 0 0 2 0 20 0 1 0 806660689 10452992 1039 18446744073709551615 94202653388800 94202653965661 140728351794288 0 0 0 65536 3686404 1266761467 1 0 0 17 11 0 0 0 0 0 94202654164112 94202654186268 94202661220352 140728351795906 140728351795918 140728351795918 140728351801324 0
 
@@ -186,5 +186,5 @@ func LinuxPidState(pid uint64) (*LinuxProcState, error) {
 	}
 
 	state := &LinuxProcState{}
-	return state, state.Parse(string(pStat))
+	return state, state.parse(string(pStat))
 }
