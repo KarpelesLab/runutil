@@ -7,7 +7,7 @@ import (
 	"os/exec"
 )
 
-// Run is a very simple invokation of command run, with output forwarded to stdout
+// Run is a very simple invokation of command run, with output forwarded to stdout. This will wait for the command to complete.
 func Run(arg ...string) error {
 	if len(arg) == 0 {
 		return ErrCommandMissing
@@ -28,7 +28,7 @@ func Run(arg ...string) error {
 	return c.Run()
 }
 
-// RunWrite executed the command and passes r as its input
+// RunWrite executes the command and passes r as its input, waiting for it to complete.
 func RunWrite(r io.Reader, arg ...string) error {
 	if len(arg) == 0 {
 		return ErrCommandMissing
@@ -50,7 +50,8 @@ func RunWrite(r io.Reader, arg ...string) error {
 	return c.Run()
 }
 
-// RunRead executes and returns the command's output as a stream
+// RunRead executes the command in background and returns its output as a stream.
+// Close the stream to kill the command and release its resources.
 func RunRead(arg ...string) (Pipe, error) {
 	if len(arg) == 0 {
 		return nil, ErrCommandMissing
@@ -82,7 +83,7 @@ func RunRead(arg ...string) (Pipe, error) {
 	return re, nil
 }
 
-// RunPipe runs a command, connecting both ends
+// RunPipe runs a command in background, connecting both ends
 func RunPipe(r io.Reader, arg ...string) (Pipe, error) {
 	if len(arg) == 0 {
 		return nil, ErrCommandMissing
@@ -115,7 +116,7 @@ func RunPipe(r io.Reader, arg ...string) (Pipe, error) {
 	return re, nil
 }
 
-// RunGet executes the command and returns its output as a buffer
+// RunGet executes the command and returns its output as a buffer after it completes.
 func RunGet(arg ...string) ([]byte, error) {
 	if len(arg) == 0 {
 		return nil, ErrCommandMissing
@@ -140,7 +141,7 @@ func RunJson(obj interface{}, arg ...string) error {
 	if err != nil {
 		return err
 	}
-	defer r.Close() // close pipe after we finish reading, since json decoder won't read until EOF
+	defer r.Close() // close pipe after we finish reading
 
 	// parse
 	dec := json.NewDecoder(r)
