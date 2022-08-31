@@ -19,6 +19,20 @@ func TestLinuxParse(t *testing.T) {
 	}
 
 	log.Printf("test = %+v", s)
+	// {Pid:3947 Comm:bash test State:'S' PPid:3799 PGrp:3947 Session:3799 TtyNr:34828 Tpgid:3964 Flags:4194304 Minflt:547 Cminflt:1212 Majflt:0 Cmajflt:2 Utime:0 Stime:0 Cutime:2 Cstime:0 Priority:20 Nice:0 NumThreads:1 Itrealvalue:0 StartTime:806660689 Vsize:10452992 RSS:1039 RSSlim:18446744073709551615}
+
+	if s.Pid != 3947 {
+		t.Fatal("invalid pid in decoded state")
+	}
+	if s.Comm != "bash test" {
+		t.Fatal("invalid comm in decoded state")
+	}
+	if s.State != 'S' {
+		t.Fatal("invalid state in decoded state")
+	}
+	if s.RSS != 1039 {
+		t.Fatal("invalid RSS in decoded state")
+	}
 
 	testVal := 30 * time.Millisecond
 
