@@ -2,6 +2,6 @@
 
 package runutil
 
-func PidState(name string) (ProcState, error) {
+func PidState(pid uint64) (ProcState, error) {
 	return nil, ErrNotSupported
 }
