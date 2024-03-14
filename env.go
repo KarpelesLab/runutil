@@ -19,12 +19,18 @@ func sysEnv() Env {
 }
 
 // NewEnv returns an empty env with only HOME, PATH set
-func NewEnv(home string) Env {
+func NewEnv(home string, vars ...string) Env {
 	usr := "root"
 	if home != "/" {
 		usr = path.Base(home)
 	}
-	return Env{"USER=" + usr, "PWD=/", "HOME=" + home, "PATH=/usr/sbin:/usr/bin:/sbin:/bin"}
+	e := Env{"USER=" + usr, "PWD=/", "HOME=" + home, "PATH=/usr/sbin:/usr/bin:/sbin:/bin"}
+
+	if len(vars) == 0 {
+		return e
+	}
+
+	return e.Join(Env(vars)).Dedup()
 }
 
 // Join appends in one shot multiple environments together. No check for duplicates is done
