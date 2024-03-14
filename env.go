@@ -110,6 +110,10 @@ func (e Env) Contains(k string) bool {
 
 // Dedup returns a copy of e with any duplicate value removed
 func (e Env) Dedup() Env {
+	if e == nil {
+		return nil
+	}
+
 	v := make(map[string]bool)
 	ln := len(e)
 	ne := make(Env, ln)
