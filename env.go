@@ -2,7 +2,6 @@ package runutil
 
 import (
 	"os"
-	"os/exec"
 	"path"
 	"slices"
 	"strings"
@@ -22,28 +21,6 @@ func NewEnv(home string) Env {
 		usr = path.Base(home)
 	}
 	return Env{"USER=" + usr, "PWD=/", "HOME=" + home, "PATH=/usr/sbin:/usr/bin:/sbin:/bin"}
-}
-
-// Run is a very simple invokation of command run, with output forwarded to stdout. This will wait for the command to complete.
-func (e Env) Run(arg ...string) error {
-	if len(arg) == 0 {
-		return ErrCommandMissing
-	}
-
-	cmd, err := exec.LookPath(arg[0])
-	if err != nil {
-		return err
-	}
-
-	c := &exec.Cmd{
-		Path:   cmd,
-		Args:   arg,
-		Stdout: os.Stdout,
-		Stderr: os.Stderr,
-		Env:    []string(e),
-	}
-
-	return c.Run()
 }
 
 func (e Env) Join(others ...Env) Env {
