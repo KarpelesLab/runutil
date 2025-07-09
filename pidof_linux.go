@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 )
 
 func PidOf(name string) (res []int) {
@@ -42,4 +43,14 @@ func PidOf(name string) (res []int) {
 		}
 	}
 	return
+}
+
+func ArgsOf(pid int) ([]string, error) {
+	// load /proc/<pid>/cmdline, and split on nil chars
+	buf, err := os.ReadFile(filepath.Join("/proc", strconv.Itoa(pid), "cmdline"))
+	if err != nil {
+		return nil, err
+	}
+	// not sure about converting to string before split, but probably more effiscient than splitting and converting each byte array to string
+	return strings.Split(string(buf), string([]byte{0})), nil
 }
